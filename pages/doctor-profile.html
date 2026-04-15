@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Profile | MediBook</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .profile-header {
+            display: flex;
+            gap: 3rem;
+            align-items: flex-start;
+            margin-bottom: 3rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+        .profile-img-large {
+            width: 350px;
+            aspect-ratio: 1;
+            border-radius: var(--radius-lg);
+            object-fit: cover;
+            box-shadow: var(--shadow-lg);
+            border: 8px solid white;
+        }
+        .info-stats {
+            display: flex;
+            gap: 3rem;
+            margin-bottom: 2.5rem;
+        }
+        .info-stat-item h4 {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .info-stat-item p {
+            font-size: 1.5rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+        .slot-btn {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: var(--radius);
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+        .slot-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: #f0f7ff;
+            transform: translateY(-2px);
+        }
+        .slot-btn.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        @media (max-width: 992px) {
+            .profile-header { flex-direction: column; align-items: center; text-align: center; gap: 2rem; }
+            .profile-img-large { width: 100%; max-width: 320px; }
+            .info-stats { justify-content: center; width: 100%; }
+        }
+        @media (max-width: 480px) {
+            .info-stats { gap: 1.5rem; }
+            .info-stat-item p { font-size: 1.25rem; }
+            .slot-grid { grid-template-columns: repeat(2, 1fr); }
+            #confirmBtn { width: 100%; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+</head>
+<body>
+    <div id="particles-container"></div>
+    <main class="main-content">
+        <div class="container">
+            <div id="profileContainer">
+                <!-- Data will be injected here -->
+            </div>
+            
+            <div id="bookingSection" style="display: none;" class="card mt-4">
+                <h2 style="margin-bottom: 0.5rem;">Select a Time Slot</h2>
+                <p class="text-secondary">Available slots for today</p>
+                <div id="slotsGrid" class="slot-grid">
+                    <!-- Slots will be injected here -->
+                </div>
+                <div style="margin-top: 2rem; display: flex; justify-content: flex-end;">
+                    <button id="confirmBtn" class="btn btn-primary btn-lg" disabled>Confirm Booking</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const doctorId = parseInt(urlParams.get('id'));
+        const doctor = doctorsData.find(d => d.id === doctorId);
+        let selectedSlot = null;
+
+        if (!doctor) {
+            document.getElementById('profileContainer').innerHTML = '<h2>Doctor not found</h2><a href="home.html">Back to list</a>';
+        } else {
+            document.title = `${doctor.name} | MediBook`;
+            renderProfile();
+        }
+
+        function renderProfile() {
+            document.getElementById('profileContainer').innerHTML = `
+                <div class="profile-header">
+                    <img src="${doctor.image}" alt="${doctor.name}" class="profile-img-large">
+                    <div style="flex: 1; width: 100%;">
+                        <span class="specialty" style="font-size: 1.125rem;">${doctor.specialty}</span>
+                        <h1 style="font-size: 2.5rem; margin-bottom: 1.5rem;">${doctor.name}</h1>
+                        
+                        <div class="info-stats">
+                            <div class="info-stat-item">
+                                <h4>Rating</h4>
+                                <p>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#fbbf24" stroke="none"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                                    ${doctor.rating}
+                                </p>
+                            </div>
+                            <div class="info-stat-item">
+                                <h4>Fee</h4>
+                                <p>${doctor.price}</p>
+                            </div>
+                        </div>
+
+                        <div class="card" style="text-align: left;">
+                            <h3 style="margin-bottom: 0.75rem;">About Doctor</h3>
+                            <p class="text-secondary" style="line-height: 1.8;">${doctor.about}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('bookingSection').style.display = 'block';
+            const slotsGrid = document.getElementById('slotsGrid');
+            slotsGrid.innerHTML = doctor.slots.map(slot => `
+                <button class="slot-btn" onclick="selectSlot('${slot}', this)">${slot}</button>
+            `).join('');
+        }
+
+        function selectSlot(slot, btn) {
+            document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedSlot = slot;
+            document.getElementById('confirmBtn').disabled = false;
+        }
+
+        document.getElementById('confirmBtn').addEventListener('click', () => {
+            if (selectedSlot) {
+                window.location.href = `booking.html?id=${doctor.id}&slot=${encodeURIComponent(selectedSlot)}`;
+            }
+        });
+    </script>
+</body>
+</html>

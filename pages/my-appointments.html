@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Appointments | MediBook</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .appointment-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .date-badge {
+            background: #f1f5f9;
+            padding: 0.75rem;
+            border-radius: var(--radius);
+            text-align: center;
+            min-width: 80px;
+        }
+        .date-badge .day { font-size: 1.25rem; font-weight: 700; display: block; }
+        .date-badge .month { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; }
+
+        .appointment-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        @media (max-width: 768px) {
+            .appointment-item { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                gap: 1rem;
+            }
+            .appointment-info {
+                width: 100%;
+            }
+            .appointment-header {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .appointment-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+            .appointment-actions .btn {
+                width: 100%;
+            }
+            .date-badge {
+                width: 100%;
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                gap: 0.5rem;
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-container"></div>
+    <main class="main-content">
+        <div class="container fade-in">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                <h1 style="font-size: 2rem;">My Bookings</h1>
+                <a href="home.html" class="btn btn-primary">Book New</a>
+            </div>
+            
+            <div id="appointmentsList">
+                <!-- Data will be injected here -->
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/main.js"></script>
+    <script>
+        function cancelAppointment(id) {
+            MediModal.confirm(
+                'إلغاء الموعد',
+                'هل أنت متأكد أنك تريد إلغاء هذا الموعد؟ لا يمكن التراجع عن هذا الإجراء.',
+                () => {
+                    let apps = AppStore.appointments;
+                    apps = apps.filter(a => a.id !== id);
+                    AppStore.appointments = apps;
+                    renderAppointments();
+                    showNotification('تم إلغاء الموعد بنجاح', 'success');
+                }
+            );
+        }
+
+        function renderAppointments() {
+            const container = document.getElementById('appointmentsList');
+            const apps = AppStore.appointments;
+
+            if (apps.length === 0) {
+                container.innerHTML = `
+                    <div class="card text-center" style="padding: 4rem;">
+                        <div style="background: #f1f5f9; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                        </div>
+                        <h2 style="margin-bottom: 0.5rem;">No bookings found</h2>
+                        <p class="text-secondary mb-4">You haven't booked any medical appointments yet.</p>
+                        <a href="home.html" class="btn btn-primary">Find a Doctor</a>
+                    </div>
+                `;
+                return;
+            }
+
+            // Show newest first
+            const sortedApps = [...apps].reverse();
+
+            container.innerHTML = sortedApps.map(app => {
+                const dateObj = new Date(app.date);
+                const day = dateObj.getDate();
+                const month = dateObj.toLocaleString('default', { month: 'short' });
+                
+                let statusClass = 'status-waiting';
+                if (app.status === 'Completed') statusClass = 'status-completed';
+                if (app.status === 'Your Turn') statusClass = 'status-yourturn';
+
+                const canCancel = app.status !== 'Completed';
+
+                return `
+                    <div class="card appointment-item fade-in">
+                        <div class="date-badge">
+                            <span class="day">${day || '--'}</span>
+                            <span class="month">${month || '---'}</span>
+                        </div>
+                        <div class="appointment-info" style="flex: 1;">
+                            <div class="appointment-header" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;">
+                                <div>
+                                    <h3 style="margin-bottom: 0.25rem; font-size: 1.25rem;">${app.doctorName}</h3>
+                                    <p class="text-secondary">${app.specialty} • ${app.slot}</p>
+                                </div>
+                                <span class="status-badge ${statusClass}">${app.status}</span>
+                            </div>
+                        </div>
+                        <div class="appointment-actions">
+                            <a href="track.html?id=${app.id}" class="btn btn-outline" style="flex: 1;">Track Queue</a>
+                            ${canCancel ? `<button onclick="cancelAppointment('${app.id}')" class="btn btn-danger-outline" style="flex: 1;">Cancel</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', renderAppointments);
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Appointment | MediBook</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .tracking-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+            animation: fadeIn 0.6s ease-out;
+        }
+        .main-status-card {
+            text-align: center;
+            padding: 3.5rem 2rem;
+        }
+        .queue-big-number {
+            font-size: 6rem;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+            margin: 1.5rem 0;
+            text-shadow: 0 10px 15px rgba(37, 99, 235, 0.1);
+        }
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+        .stat-item h4 { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .stat-item p { font-size: 1.75rem; font-weight: 800; color: var(--text-primary); }
+        
+        .doctor-sidebar {
+            height: fit-content;
+        }
+
+        @media (max-width: 992px) {
+            .tracking-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 640px) {
+            .queue-big-number { font-size: 4.5rem; }
+            .stats-row { 
+                flex-direction: column; 
+                gap: 2rem; 
+                align-items: center;
+            }
+            .main-status-card { padding: 2.5rem 1.5rem; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-container"></div>
+    <main class="main-content">
+        <div class="container">
+            <div class="tracking-grid">
+                <div class="card main-status-card">
+                    <span id="statusBadge" class="status-badge status-waiting">Waiting</span>
+                    <h2 id="statusText">Your current position in queue</h2>
+                    
+                    <div class="queue-big-number" id="queuePos">--</div>
+                    
+                    <div class="progress-container">
+                        <div id="progressBar" class="progress-bar"></div>
+                    </div>
+
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <h4>People Ahead</h4>
+                            <p id="peopleAhead">--</p>
+                        </div>
+                        <div class="stat-item">
+                            <h4>Avg. Wait Time</h4>
+                            <p id="waitTime">-- mins</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doctor-sidebar">
+                    <div class="card">
+                        <h3 style="margin-bottom: 1.5rem;">Appointment Details</h3>
+                        <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem;">
+                            <img id="docImg" src="" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+                            <div>
+                                <h4 id="docName">Dr. Name</h4>
+                                <p id="docSpecialty" class="text-secondary" style="font-size: 0.875rem;">Specialty</p>
+                            </div>
+                        </div>
+                        <div style="padding: 1rem; background: var(--background); border-radius: var(--radius);">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span class="text-secondary">Slot:</span>
+                                <span id="aptSlot" style="font-weight: 600;">--:--</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span class="text-secondary">Date:</span>
+                                <span id="aptDate" style="font-weight: 600;">--/--/--</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline" style="width: 100%; margin-top: 1.5rem; color: var(--danger); border-color: var(--danger);" onclick="cancelAppointment()">Cancel Appointment</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/main.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const aptId = urlParams.get('id');
+        let appointments = AppStore.appointments;
+        let appointment = appointments.find(a => a.id === aptId);
+
+        if (!appointment) {
+            window.location.href = 'home.html';
+        }
+
+        // Initialize display
+        document.getElementById('docImg').src = appointment.doctorImage;
+        document.getElementById('docName').innerText = appointment.doctorName;
+        document.getElementById('docSpecialty').innerText = appointment.specialty;
+        document.getElementById('aptSlot').innerText = appointment.slot;
+        document.getElementById('aptDate').innerText = appointment.date;
+
+        let peopleAhead = appointment.peopleAhead;
+        const totalPeople = peopleAhead + 1;
+        
+        function updateUI() {
+            const queuePos = document.getElementById('queuePos');
+            const peopleAheadEl = document.getElementById('peopleAhead');
+            const waitTimeEl = document.getElementById('waitTime');
+            const statusBadge = document.getElementById('statusBadge');
+            const statusText = document.getElementById('statusText');
+            const progressBar = document.getElementById('progressBar');
+
+            queuePos.innerText = peopleAhead + 1;
+            peopleAheadEl.innerText = peopleAhead;
+            waitTimeEl.innerText = peopleAhead * 5; // 5 mins per person
+
+            const progress = ((totalPeople - (peopleAhead + 1)) / totalPeople) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            if (peopleAhead > 3) {
+                statusBadge.className = 'status-badge status-waiting';
+                statusBadge.innerText = 'Waiting';
+            } else if (peopleAhead > 0) {
+                statusBadge.className = 'status-badge status-progress';
+                statusBadge.innerText = 'In Progress';
+                statusText.innerText = "You're getting closer!";
+            } else if (peopleAhead === 0) {
+                statusBadge.className = 'status-badge status-yourturn';
+                statusBadge.innerText = 'Your Turn';
+                statusText.innerText = "Please head to the clinic room now!";
+                if (!window.hasNotified) {
+                    showNotification("🔔 It's your turn! Please proceed to the doctor's office.", "primary");
+                    window.hasNotified = true;
+                }
+            } else {
+                statusBadge.className = 'status-badge status-completed';
+                statusBadge.innerText = 'Completed';
+                statusText.innerText = "Appointment finished. Thank you!";
+                progressBar.style.width = '100%';
+                clearInterval(simInterval);
+            }
+        }
+
+        // Simulation logic
+        const simInterval = setInterval(() => {
+            if (peopleAhead >= 0) {
+                peopleAhead--;
+                updateUI();
+                
+                // Update in storage too
+                const apps = AppStore.appointments;
+                const idx = apps.findIndex(a => a.id === aptId);
+                if (idx !== -1) {
+                    apps[idx].peopleAhead = peopleAhead;
+                    apps[idx].status = peopleAhead < 0 ? 'Completed' : (peopleAhead === 0 ? 'Your Turn' : 'Waiting');
+                    AppStore.appointments = apps;
+                }
+            }
+        }, 5000); // Update every 5 seconds for demo
+
+        function cancelAppointment() {
+            MediModal.confirm(
+                'إلغاء الموعد',
+                'هل أنت متأكد أنك تريد إلغاء هذا الموعد؟ سيتم مسح بيانات الانتظار الخاصة بك.',
+                () => {
+                    const apps = AppStore.appointments.filter(a => a.id !== aptId);
+                    AppStore.appointments = apps;
+                    showNotification('تم إلغاء الموعد بنجاح', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'home.html';
+                    }, 500);
+                }
+            );
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
