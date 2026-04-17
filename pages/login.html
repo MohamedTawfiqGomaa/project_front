@@ -1,153 +1,136 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | MediBook</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #f0f7ff 0%, #e2e8f0 100%);
-            overflow: hidden;
-            position: relative;
-        }
-        
-        /* Particles Container */
-        #particles-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .particle {
-            position: absolute;
-            opacity: 0.1;
-            animation: float 15s linear infinite;
-            color: var(--primary);
-        }
-
-        @keyframes float {
-            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.15; }
-            90% { opacity: 0.15; }
-            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
-        }
-
-        .login-card {
-            width: 100%;
-            max-width: 400px;
-            padding: 2.5rem;
-            animation: fadeIn 0.6s ease-out;
-            position: relative;
-            z-index: 10;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تسجيل الدخول | Medi Queue</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      border-radius: var(--radius-lg);
+      animation: fadeIn 0.55s ease;
+    }
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-block-end: 0.35rem;
+    }
+    .auth-hint {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-block-end: 1.25rem;
+      line-height: 1.6;
+    }
+    .demo-box {
+      font-size: 0.82rem;
+      background: color-mix(in srgb, var(--primary) 8%, transparent);
+      border: 1px dashed color-mix(in srgb, var(--primary) 35%, var(--border));
+      border-radius: var(--radius);
+      padding: 0.75rem;
+      margin-block-end: 1.25rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+  </style>
 </head>
 <body>
-    <div id="particles-container"></div>
+  <div id="particles-container"></div>
 
-    <div class="card login-card">
-        <div class="text-center mb-4">
-            <h1 class="logo" style="justify-content: center; font-size: 2rem;">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-                MediBook
-            </h1>
-            <p class="text-secondary mt-4" style="font-weight: 500;">Welcome back! Please login to your account.</p>
-        </div>
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="logo-mark" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+      </span>
+      Medi Queue
+    </div>
+    <p class="auth-hint">منصة حجز المواعيد وإدارة الطابور بين المرضى والعيادات.</p>
 
-        <form id="loginForm">
-            <div class="form-group">
-                <label class="form-label">Email or Phone</label>
-                <input type="text" class="form-input" placeholder="e.g. 0123456789" required id="identifier">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Password</label>
-                <input type="password" class="form-input" placeholder="••••••••" required id="password">
-            </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%; height: 3.2rem; font-size: 1.1rem; border-radius: 12px;">Login</button>
-        </form>
-
-        <p class="text-center text-secondary" style="margin-top: 1.5rem; font-size: 0.875rem;">
-            Don't have an account? <a href="#" style="color: var(--primary); font-weight: 600;">Sign up</a>
-        </p>
+    <div class="demo-box">
+      <strong>حسابات تجريبية</strong> (كلمة المرور: <strong>123456</strong>)<br />
+      مريض: patient@mediq.local<br />
+      طبيب: doctor@mediq.local<br />
+      مدير: admin@mediq.local
     </div>
 
-    <script src="../js/main.js"></script>
-    <script>
-        // Particle System Logic
-        const container = document.getElementById('particles-container');
-        const icons = [
-            '<path d="M12 5v14M5 12h14"/>', // Plus
-            '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>', // Heart
-            '<rect x="2" y="7" width="20" height="10" rx="5" ry="5"/>', // Pill
-            '<path d="M4.5 16.5c1.5 1.5 3 1.5 4.5 0s3-1.5 4.5 0 3 1.5 4.5 0"/>' // DNA Wave
-        ];
+    <form id="loginForm">
+      <div class="form-group">
+        <label class="form-label" for="email">البريد الإلكتروني</label>
+        <input class="form-input" type="email" id="email" required placeholder="you@example.com" autocomplete="username" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">كلمة المرور</label>
+        <input class="form-input" type="password" id="password" required placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn btn-primary btn-block btn-lg">تسجيل الدخول</button>
+    </form>
 
-        function createParticle() {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            
-            const size = Math.random() * 30 + 15;
-            const left = Math.random() * 100;
-            const duration = Math.random() * 12 + 8;
-            const delay = Math.random() * 10;
-            const icon = icons[Math.floor(Math.random() * icons.length)];
+    <p class="text-center text-secondary" style="margin-top: 1.25rem; font-size: 0.9rem">
+      ليس لديك حساب؟
+      <a href="register.html" style="color: var(--primary); font-weight: 800">إنشاء حساب</a>
+    </p>
+    <p class="text-center" style="margin-top: 0.75rem">
+      <button type="button" class="btn btn-ghost btn-sm" id="themeToggleAuth">🌙 الوضع الليلي</button>
+    </p>
+  </div>
 
-            particle.style.width = `${size}px`;
-            particle.style.height = `${size}px`;
-            particle.style.left = `${left}%`;
-            particle.style.animationDuration = `${duration}s`;
-            particle.style.animationDelay = `-${delay}s`;
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var b = document.getElementById('themeToggleAuth');
+      if (AppStore.darkMode) b.textContent = '☀️ الوضع الفاتح';
+    });
+    document.getElementById('themeToggleAuth').addEventListener('click', function () {
+      AppStore.darkMode = !AppStore.darkMode;
+      this.textContent = AppStore.darkMode ? '☀️ الوضع الفاتح' : '🌙 الوضع الليلي';
+    });
 
-            particle.innerHTML = `
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    ${icon}
-                </svg>
-            `;
-
-            container.appendChild(particle);
-
-            // Re-spawn to keep the flow
-            setTimeout(() => {
-                particle.remove();
-                createParticle();
-            }, duration * 1000);
-        }
-
-        // Initialize particles
-        for(let i = 0; i < 20; i++) {
-            createParticle();
-        }
-
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const identifier = document.getElementById('identifier').value;
-            
-            AppStore.currentUser = {
-                name: "John Doe",
-                identifier: identifier
-            };
-            
-            window.location.href = 'home.html';
-        });
-    </script>
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = document.getElementById('email').value.trim().toLowerCase();
+      var password = document.getElementById('password').value;
+      var users = AppStore.users;
+      var found = users.find(function (u) {
+        return u.email === email && u.password === password;
+      });
+      if (!found) {
+        MediModal.alert('تعذر الدخول', 'البريد أو كلمة المرور غير صحيحة.');
+        return;
+      }
+      AppStore.currentUser = {
+        id: found.id,
+        email: found.email,
+        name: found.name,
+        phone: found.phone,
+        role: found.role,
+        doctorId: found.doctorId || null,
+      };
+      window.location.href = redirectForRole(AppStore.currentUser);
+    });
+  </script>
 </body>
 </html>

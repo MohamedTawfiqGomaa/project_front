@@ -1,166 +1,165 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirm Booking | MediBook</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        .booking-summary {
-            background: #f0f7ff;
-            border: 1px dashed var(--primary);
-            padding: 2rem;
-            border-radius: var(--radius-lg);
-            margin-bottom: 2rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-        
-        .booking-summary img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid white;
-            box-shadow: var(--shadow);
-        }
-
-        .booking-summary h3 {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-
-        .booking-summary .details {
-            font-size: 1rem;
-            color: var(--text-secondary);
-        }
-
-        .form-grid {
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 1.5rem;
-        }
-
-        @media (max-width: 768px) {
-            .booking-summary {
-                flex-direction: column;
-                text-align: center;
-                padding: 1.5rem;
-                gap: 1rem;
-            }
-            .booking-summary img {
-                width: 100px;
-                height: 100px;
-            }
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            .booking-footer {
-                flex-direction: column;
-                gap: 1.5rem;
-                text-align: center;
-            }
-            .booking-footer .btn {
-                width: 100%;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تأكيد الحجز | Medi Queue</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .booking-summary {
+      background: color-mix(in srgb, var(--primary) 8%, transparent);
+      border: 1px dashed color-mix(in srgb, var(--primary) 35%, var(--border));
+      padding: 1.5rem;
+      border-radius: var(--radius-lg);
+      margin-block-end: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .booking-summary img {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .booking-footer {
+      margin-top: 1.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+    }
+    @media (max-width: 720px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .booking-summary {
+        justify-content: center;
+        text-align: center;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div id="particles-container"></div>
-    <main class="main-content">
-        <div class="container fade-in" style="max-width: 650px;">
-            <div class="card">
-                <header style="margin-bottom: 2rem; text-align: center;">
-                    <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem;">Complete your Booking</h1>
-                    <p class="text-secondary">Please review the details and provide patient information.</p>
-                </header>
-                
-                <div id="summaryContainer">
-                    <!-- Summary will be injected here -->
-                </div>
+  <div id="particles-container"></div>
+  <main class="main-content">
+    <div class="container fade-in" style="max-width: 700px">
+      <div class="card">
+        <header style="margin-block-end: 1.5rem; text-align: center">
+          <h1 style="font-size: 1.65rem; font-weight: 900; margin-block-end: 0.35rem">إتمام الحجز</h1>
+          <p class="text-secondary">راجع بيانات الطبيب ثم أدخل بياناتك للتأكيد.</p>
+        </header>
 
-                <form id="bookingForm">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-secondary);">Patient Full Name</label>
-                            <input type="text" class="form-input" required id="patientName" placeholder="Full name">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-secondary);">Phone Number</label>
-                            <input type="tel" class="form-input" required id="patientPhone" placeholder="01XXXXXXXXX">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group" style="margin-top: 1.5rem;">
-                        <label class="form-label" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-secondary);">Reason for Visit (Optional)</label>
-                        <textarea class="form-input" rows="3" placeholder="Briefly describe your symptoms..."></textarea>
-                    </div>
+        <div id="summaryContainer"></div>
 
-                    <div class="booking-footer" style="margin-top: 2.5rem; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 2rem;">
-                        <p class="text-secondary" style="font-size: 0.875rem;">By clicking confirm, you agree to our terms.</p>
-                        <button type="submit" class="btn btn-primary btn-lg" style="padding: 1rem 2rem;">Confirm & Track Appointment</button>
-                    </div>
-                </form>
+        <form id="bookingForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="patientName">الاسم الكامل</label>
+              <input class="form-input" required id="patientName" placeholder="الاسم كما في الهوية" />
             </div>
-        </div>
-    </main>
-
-
-    <script src="../js/data.js"></script>
-    <script src="../js/main.js"></script>
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const doctorId = parseInt(urlParams.get('id'));
-        const slot = urlParams.get('slot');
-        const doctor = doctorsData.find(d => d.id === doctorId);
-
-        if (!doctor || !slot) {
-            window.location.href = 'home.html';
-        }
-
-        document.getElementById('summaryContainer').innerHTML = `
-            <div class="booking-summary">
-                <img src="${doctor.image}" alt="${doctor.name}">
-                <div>
-                    <h3>${doctor.name}</h3>
-                    <div class="details">
-                    <p>${doctor.specialty} • <strong>${slot}</strong> Today</p>
-                    <p style="color: var(--primary); font-weight: 700; font-size: 1.25rem; margin-top: 0.5rem;">Price: ${doctor.price}</p>
-                </div>
+            <div class="form-group">
+              <label class="form-label" for="patientPhone">رقم الجوال</label>
+              <input class="form-input" type="tel" required id="patientPhone" placeholder="05xxxxxxxx" />
             </div>
-        `;
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reason">سبب الزيارة (اختياري)</label>
+            <textarea class="form-input" id="reason" rows="3" placeholder="صف أعراضك باختصار…"></textarea>
+          </div>
 
-        document.getElementById('bookingForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const appointment = {
-                id: 'APT-' + Date.now(),
-                doctorId: doctor.id,
-                doctorName: doctor.name,
-                doctorImage: doctor.image,
-                specialty: doctor.specialty,
-                slot: slot,
-                patientName: document.getElementById('patientName').value,
-                patientPhone: document.getElementById('patientPhone').value,
-                date: new Date().toLocaleDateString(),
-                status: 'Waiting',
-                queueNumber: Math.floor(Math.random() * 20) + 1,
-                peopleAhead: Math.floor(Math.random() * 10) + 5,
-                waitTime: 0 // Will be calculated dynamically in track page
-            };
+          <div class="booking-footer">
+            <p class="text-secondary" style="font-size: 0.88rem; flex: 1; min-width: 220px">
+              بالضغط على «تأكيد الحجز» فإنك توافق على سياسة الحجز التجريبية للمنصة.
+            </p>
+            <button type="submit" class="btn btn-primary btn-lg">تأكيد الحجز</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
 
-            // Save to appointments
-            const apps = AppStore.appointments;
-            apps.push(appointment);
-            AppStore.appointments = apps;
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    var urlParams = new URLSearchParams(window.location.search);
+    var doctorId = parseInt(urlParams.get('id'), 10);
+    var slot = urlParams.get('slot');
+    var doctor = AppStore.getDoctors().find(function (d) {
+      return d.id === doctorId;
+    });
 
-            // Redirect to tracking page
-            window.location.href = `track.html?id=${appointment.id}`;
-        });
-    </script>
+    if (!doctor || !slot) {
+      window.location.href = 'home.html';
+    } else {
+      var clinic = getClinicById(doctor.clinicId);
+      document.getElementById('summaryContainer').innerHTML =
+        '<div class="booking-summary">' +
+        '<img src="' +
+        doctor.image +
+        '" alt="" />' +
+        '<div style="flex:1;min-width:200px">' +
+        '<h3 style="font-size:1.25rem;font-weight:900;margin-block-end:0.35rem">' +
+        doctor.name +
+        '</h3>' +
+        '<p class="text-secondary" style="font-weight:700">' +
+        doctor.specialty +
+        ' • ' +
+        (clinic ? clinic.name : '') +
+        '</p>' +
+        '<p class="text-secondary" style="margin-top:0.45rem">الموعد: <strong>' +
+        slot +
+        '</strong> (اليوم)</p>' +
+        '<p style="margin-top:0.55rem;color:var(--primary);font-weight:900">' +
+        'سعر الكشف: ' +
+        formatDoctorPrice(doctor) +
+        '</p></div></div>';
+
+      var u = AppStore.currentUser;
+      if (u && u.name) document.getElementById('patientName').value = u.name;
+      if (u && u.phone) document.getElementById('patientPhone').value = u.phone;
+    }
+
+    document.getElementById('bookingForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var clinic = getClinicById(doctor.clinicId);
+      var user = AppStore.currentUser;
+      var peopleAhead = Math.floor(Math.random() * 8) + 3;
+      var appointment = {
+        id: 'APT-' + Date.now(),
+        doctorId: doctor.id,
+        doctorName: doctor.name,
+        doctorImage: doctor.image,
+        clinicName: clinic ? clinic.name : '',
+        specialty: doctor.specialty,
+        slot: slot,
+        patientName: document.getElementById('patientName').value.trim(),
+        patientPhone: document.getElementById('patientPhone').value.trim(),
+        patientUserId: user ? user.id : null,
+        reason: document.getElementById('reason').value.trim(),
+        date: new Date().toLocaleDateString('ar-SA'),
+        status: 'confirmed',
+        visitStatus: 'queued',
+        queueNumber: peopleAhead + 1,
+        peopleAhead: peopleAhead,
+        queuePhase: 'waiting',
+      };
+      var apps = AppStore.appointments;
+      apps.push(appointment);
+      AppStore.appointments = apps;
+      window.location.href = 'track.html?id=' + encodeURIComponent(appointment.id);
+    });
+  </script>
 </body>
 </html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إنشاء حساب | Medi Queue</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 460px;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      border-radius: var(--radius-lg);
+      animation: fadeIn 0.55s ease;
+    }
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-block-end: 0.35rem;
+    }
+    .auth-hint {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-block-end: 1.25rem;
+    }
+    .role-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+    .role-option {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.55rem 0.35rem;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 0.88rem;
+      background: var(--surface);
+      transition: var(--transition);
+    }
+    .role-option input {
+      display: none;
+    }
+    .role-option span {
+      display: block;
+    }
+    .role-option small {
+      display: block;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      margin-top: 0.15rem;
+    }
+    .role-option:has(input:checked) {
+      border-color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 10%, transparent);
+      color: var(--primary);
+    }
+    @media (max-width: 480px) {
+      .role-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="particles-container"></div>
+
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="logo-mark" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+      </span>
+      إنشاء حساب
+    </div>
+    <p class="auth-hint">اختر نوع المستخدم ثم أكمل البيانات. التسجيل للتجربة المحلية فقط.</p>
+
+    <form id="regForm">
+      <div class="form-group">
+        <span class="form-label">نوع المستخدم</span>
+        <div class="role-grid">
+          <label class="role-option"><input type="radio" name="role" value="patient" checked /><span>مريض</span><small>حجز ومتابعة</small></label>
+          <label class="role-option"><input type="radio" name="role" value="doctor" /><span>طبيب</span><small>ربط بملف طبيب</small></label>
+          <label class="role-option"><input type="radio" name="role" value="admin" /><span>مدير</span><small>لوحة تحكم</small></label>
+        </div>
+      </div>
+
+      <div class="form-group" id="doctorPickWrap" style="display: none">
+        <label class="form-label" for="doctorPick">الملف الطبي المرتبط</label>
+        <select class="form-select" id="doctorPick"></select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="name">الاسم الكامل</label>
+        <input class="form-input" id="name" required placeholder="مثال: أحمد علي" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="phone">رقم الجوال</label>
+        <input class="form-input" id="phone" required placeholder="05xxxxxxxx" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="email">البريد الإلكتروني</label>
+        <input class="form-input" type="email" id="email" required placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">كلمة المرور</label>
+        <input class="form-input" type="password" id="password" required minlength="6" placeholder="ستة أحرف على الأقل" />
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg">إنشاء الحساب</button>
+    </form>
+
+    <p class="text-center text-secondary" style="margin-top: 1.25rem; font-size: 0.9rem">
+      لديك حساب بالفعل؟
+      <a href="login.html" style="color: var(--primary); font-weight: 800">تسجيل الدخول</a>
+    </p>
+  </div>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    function fillDoctorSelect() {
+      var sel = document.getElementById('doctorPick');
+      var docs = AppStore.getDoctors();
+      sel.innerHTML = docs
+        .map(function (d) {
+          return '<option value="' + d.id + '">' + d.name + ' — ' + d.specialty + '</option>';
+        })
+        .join('');
+    }
+
+    function toggleDoctorPick() {
+      var role = document.querySelector('input[name="role"]:checked').value;
+      document.getElementById('doctorPickWrap').style.display = role === 'doctor' ? 'block' : 'none';
+    }
+
+    document.querySelectorAll('input[name="role"]').forEach(function (r) {
+      r.addEventListener('change', toggleDoctorPick);
+    });
+    fillDoctorSelect();
+    toggleDoctorPick();
+
+    document.getElementById('regForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var role = document.querySelector('input[name="role"]:checked').value;
+      var email = document.getElementById('email').value.trim().toLowerCase();
+      var users = AppStore.users;
+      if (users.some(function (u) { return u.email === email; })) {
+        MediModal.alert('البريد مستخدم', 'هذا البريد مسجل مسبقاً. جرّب تسجيل الدخول.');
+        return;
+      }
+      var id = 'u-' + Date.now();
+      var rec = {
+        id: id,
+        email: email,
+        password: document.getElementById('password').value,
+        name: document.getElementById('name').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        role: role,
+      };
+      if (role === 'doctor') {
+        rec.doctorId = parseInt(document.getElementById('doctorPick').value, 10);
+      }
+      users.push(rec);
+      AppStore.users = users;
+      AppStore.currentUser = {
+        id: rec.id,
+        email: rec.email,
+        name: rec.name,
+        phone: rec.phone,
+        role: rec.role,
+        doctorId: rec.doctorId || null,
+      };
+      window.location.href = redirectForRole(AppStore.currentUser);
+    });
+  </script>
+</body>
+</html>

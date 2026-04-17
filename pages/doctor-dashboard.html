@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة الطبيب | Medi Queue</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .dash-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+    .stat-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+      background: var(--surface);
+    }
+    .stat-card h4 {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 800;
+      margin-block-end: 0.35rem;
+    }
+    .stat-card p {
+      font-size: 1.55rem;
+      font-weight: 900;
+    }
+    .session-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+      background: color-mix(in srgb, var(--secondary) 8%, transparent);
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius-full);
+      font-size: 0.78rem;
+      font-weight: 900;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+  </style>
+</head>
+<body>
+  <div id="particles-container"></div>
+  <main class="main-content dash-page-main">
+    <div class="container" style="max-width: 1100px">
+      <section id="overview" style="scroll-margin-top: 5rem">
+        <h2 class="section-title">نظرة عامة</h2>
+        <div class="dash-grid" id="statsRow"></div>
+
+        <div class="session-card" style="margin-top: 1rem">
+          <h3 style="font-weight: 900; margin-block-end: 0.5rem">التحكم في الجلسة</h3>
+          <p class="text-secondary" style="margin-block-end: 0.75rem; font-weight: 700">
+            حدد عدد المرضى المتوقع في الجلسة (للمتابعة الداخلية).
+          </p>
+          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center">
+            <label class="form-label" style="margin: 0" for="capInput">عدد المرضى</label>
+            <input class="form-input" id="capInput" type="number" min="1" max="80" style="width: 140px" />
+            <button type="button" class="btn btn-secondary" id="saveCapBtn">حفظ</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="queue" style="margin-top: 2rem; scroll-margin-top: 5rem">
+        <h2 class="section-title">قائمة المرضى والطابور</h2>
+        <p class="text-secondary" style="margin-block-end: 0.75rem; font-weight: 700">
+          تحكم سريع في حالة الكشف لكل موعد (محاكاة).
+        </p>
+        <div class="table-wrap">
+          <table class="data-table" id="patientsTable">
+            <thead>
+              <tr>
+                <th>المريض</th>
+                <th>الموعد</th>
+                <th>حالة الطابور</th>
+                <th>حالة الحجز</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="patientsBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    function visitLabel(v) {
+      var m = { queued: 'بانتظار الدخول', in_progress: 'جاري الكشف', done: 'مكتمل', skipped: 'تم التخطي' };
+      return m[v] || v || '—';
+    }
+
+    function sessionKey() {
+      var u = AppStore.currentUser;
+      return 'mq_session_cap_' + (u && u.doctorId ? u.doctorId : '0');
+    }
+
+    function renderStats(rows) {
+      var queued = rows.filter(function (r) {
+        return (r.visitStatus || 'queued') === 'queued';
+      }).length;
+      var prog = rows.filter(function (r) {
+        return r.visitStatus === 'in_progress';
+      }).length;
+      var done = rows.filter(function (r) {
+        return r.visitStatus === 'done';
+      }).length;
+      document.getElementById('statsRow').innerHTML =
+        '<div class="stat-card"><h4>بانتظار الدخول</h4><p>' +
+        queued +
+        '</p></div>' +
+        '<div class="stat-card"><h4>جاري الكشف</h4><p>' +
+        prog +
+        '</p></div>' +
+        '<div class="stat-card"><h4>تم الإنهاء</h4><p>' +
+        done +
+        '</p></div>';
+    }
+
+    function updateVisit(id, patch) {
+      var apps = AppStore.appointments.map(function (a) {
+        if (a.id !== id) return a;
+        return Object.assign({}, a, patch);
+      });
+      AppStore.appointments = apps;
+      renderTable();
+    }
+
+    function renderTable() {
+      var user = AppStore.currentUser;
+      var doc = getDoctorForUser(user);
+      var body = document.getElementById('patientsBody');
+      if (!doc) {
+        body.innerHTML =
+          '<tr><td colspan="5" style="padding:1.25rem;font-weight:800;color:var(--danger)">لا يوجد ملف طبيب مرتبط بحسابك.</td></tr>';
+        document.getElementById('statsRow').innerHTML = '';
+        return;
+      }
+
+      var rows = AppStore.appointments
+        .filter(function (a) {
+          return a.doctorId === doc.id && a.status !== 'cancelled';
+        })
+        .slice()
+        .sort(function (a, b) {
+          return String(a.slot).localeCompare(String(b.slot), 'ar');
+        });
+
+      renderStats(rows);
+
+      if (!rows.length) {
+        body.innerHTML =
+          '<tr><td colspan="5" style="padding:1.25rem" class="text-secondary">لا توجد مواعيد لهذا الحساب حالياً.</td></tr>';
+        return;
+      }
+
+      body.innerHTML = rows
+        .map(function (a) {
+          var vs = a.visitStatus || 'queued';
+          var st = appointmentStatusLabel(a.status || 'confirmed');
+          var actions = '';
+          if (vs === 'queued') {
+            actions +=
+              '<button type="button" class="btn btn-primary btn-sm" data-act="start" data-id="' +
+              a.id +
+              '">بدء الكشف</button> ';
+          }
+          if (vs === 'in_progress') {
+            actions +=
+              '<button type="button" class="btn btn-secondary btn-sm" data-act="finish" data-id="' +
+              a.id +
+              '">إنهاء الكشف</button> ';
+          }
+          if (vs === 'queued' || vs === 'in_progress') {
+            actions +=
+              '<button type="button" class="btn btn-danger-outline btn-sm" data-act="skip" data-id="' +
+              a.id +
+              '">تخطي</button>';
+          }
+          if (!actions) actions = '<span class="text-secondary" style="font-weight:800">—</span>';
+          return (
+            '<tr>' +
+            '<td style="font-weight:900">' +
+            a.patientName +
+            '<div class="text-secondary" style="font-size:0.82rem;font-weight:700">' +
+            a.patientPhone +
+            '</div></td>' +
+            '<td style="font-weight:800">' +
+            a.slot +
+            '</td>' +
+            '<td><span class="pill">' +
+            visitLabel(vs) +
+            '</span></td>' +
+            '<td><span class="pill">' +
+            st +
+            '</span></td>' +
+            '<td><div class="table-actions">' +
+            actions +
+            '</div></td></tr>'
+          );
+        })
+        .join('');
+
+      body.querySelectorAll('button[data-act]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = btn.getAttribute('data-id');
+          var act = btn.getAttribute('data-act');
+          if (act === 'start') updateVisit(id, { visitStatus: 'in_progress' });
+          if (act === 'finish') updateVisit(id, { visitStatus: 'done', status: 'completed' });
+          if (act === 'skip') updateVisit(id, { visitStatus: 'skipped', status: 'cancelled' });
+        });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var title = document.getElementById('dashPageTitle');
+      if (title) title.textContent = 'لوحة الطبيب';
+      var cap = localStorage.getItem(sessionKey()) || '12';
+      document.getElementById('capInput').value = cap;
+      document.getElementById('saveCapBtn').addEventListener('click', function () {
+        var v = parseInt(document.getElementById('capInput').value, 10);
+        if (!v || v < 1) return MediModal.alert('تنبيه', 'يرجى إدخال عدد صحيح.');
+        localStorage.setItem(sessionKey(), String(v));
+        showNotification('تم حفظ إعدادات الجلسة.', 'success');
+      });
+      renderTable();
+    });
+  </script>
+</body>
+</html>

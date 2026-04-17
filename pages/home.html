@@ -1,187 +1,231 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find Doctors | MediBook</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        .search-section {
-            background: white;
-            padding: 4rem 0 3rem;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 2rem;
-            position: relative;
-        }
-        .filter-chip {
-            padding: 0.6rem 1.25rem;
-            border-radius: var(--radius-full);
-            border: 1px solid var(--border);
-            background: white;
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 0.875rem;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        .filter-chip.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-        .skeleton {
-            background: #e2e8f0;
-            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
-            background-size: 200% 100%;
-            animation: skeleton-loading 1.5s infinite;
-            border-radius: var(--radius);
-        }
-        @keyframes skeleton-loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        .stats-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.25rem;
-        }
-        .rating-badge {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            color: #fbbf24;
-            font-weight: 700;
-        }
-        .price-badge {
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        @media (max-width: 640px) {
-            .search-section { padding: 3rem 0; }
-            .search-section h1 { font-size: 1.75rem !important; }
-            .filter-container { 
-                margin-top: 1rem;
-                overflow-x: auto;
-                padding-bottom: 0.5rem;
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-            }
-            .filter-container::-webkit-scrollbar { display: none; }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>الأطباء | Medi Queue</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .search-section {
+      background: var(--surface);
+      padding-block: 3.5rem 2rem;
+      border-bottom: 1px solid var(--border);
+      margin-block-end: 1.75rem;
+    }
+    .page-hero-title {
+      font-size: clamp(1.55rem, 3vw, 2.15rem);
+      font-weight: 900;
+      margin-block-end: 1.25rem;
+    }
+    .search-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: stretch;
+    }
+    .search-field {
+      flex: 1 1 260px;
+      position: relative;
+    }
+    .search-field .form-input {
+      min-height: 3.25rem;
+      padding-inline-start: 1rem;
+      padding-inline-end: 2.75rem;
+    }
+    .search-field svg {
+      position: absolute;
+      inset-inline-end: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .filter-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-top: 1.25rem;
+    }
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      margin-block: 0.75rem 1rem;
+    }
+    .rating-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      color: #ca8a04;
+      font-weight: 800;
+    }
+    .clinic-line {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-block-end: 0.35rem;
+    }
+  </style>
 </head>
 <body>
-    <div id="particles-container"></div>
-    <main class="main-content">
-        <section class="search-section">
-            <div class="container fade-in">
-                <h1 style="margin-bottom: 1.5rem; font-size: 2.5rem; font-weight: 800; tracking: -0.025em;">Find the best doctors</h1>
-                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 250px; position: relative;">
-                        <input type="text" id="searchInput" class="form-input" placeholder="Search by name or specialty..." style="padding-left: 3rem; height: 3.5rem; font-size: 1rem;">
-                        <svg style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                    </div>
-                </div>
-                <div id="filterContainer" class="filter-container" style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
-                    <!-- Filter chips will be injected here -->
-                </div>
-            </div>
-        </section>
-
-        <div class="container">
-            <div id="doctorsGrid" class="grid grid-cols-4 fade-in">
-                <!-- Doctor cards or skeletons will be injected here -->
-            </div>
+  <div id="particles-container"></div>
+  <main class="main-content">
+    <section class="search-section">
+      <div class="container fade-in">
+        <h1 class="page-hero-title">ابحث عن طبيبك المناسب</h1>
+        <div class="search-row">
+          <div class="search-field">
+            <input type="search" id="searchInput" class="form-input" placeholder="ابحث باسم الطبيب أو التخصص…" />
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </div>
+          <select id="clinicFilter" class="form-select" style="flex: 0 1 220px; min-height: 3.25rem"></select>
         </div>
-    </main>
+        <div id="filterContainer" class="filter-container"></div>
+      </div>
+    </section>
 
-    <script src="../js/data.js"></script>
-    <script src="../js/main.js"></script>
-    <script>
-        let currentFilter = 'All';
-        let searchQuery = '';
+    <div class="container">
+      <div id="doctorsGrid" class="grid grid-cols-4 fade-in"></div>
+    </div>
+  </main>
 
-        function renderFilters() {
-            const container = document.getElementById('filterContainer');
-            container.innerHTML = specialties.map(s => `
-                <button class="filter-chip ${currentFilter === s ? 'active' : ''}" onclick="setFilter('${s}')">${s}</button>
-            `).join('');
-        }
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    var currentSpec = 'الكل';
+    var currentClinic = 'الكل';
+    var searchQuery = '';
 
-        function setFilter(filter) {
-            currentFilter = filter;
-            renderFilters();
-            renderDoctors();
-        }
+    function allDoctors() {
+      return AppStore.getDoctors();
+    }
 
-        function renderDoctors() {
-            const grid = document.getElementById('doctorsGrid');
-            const filtered = doctorsData.filter(d => {
-                const matchesFilter = currentFilter === 'All' || d.specialty === currentFilter;
-                const matchesSearch = d.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                     d.specialty.toLowerCase().includes(searchQuery.toLowerCase());
-                return matchesFilter && matchesSearch;
-            });
+    function clinicOptions() {
+      var sel = document.getElementById('clinicFilter');
+      var clinics = AppStore.clinics;
+      sel.innerHTML =
+        '<option value="الكل">كل العيادات</option>' +
+        clinics
+          .map(function (c) {
+            return '<option value="' + c.id + '">' + c.name + '</option>';
+          })
+          .join('');
+    }
 
-            if (filtered.length === 0) {
-                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--text-secondary); background: white; border-radius: 1rem; border: 1px dashed var(--border);">No doctors found matches your search.</div>';
-                return;
-            }
-
-            grid.innerHTML = filtered.map(d => `
-                <div class="card doctor-card fade-in">
-                    <img src="${d.image}" alt="${d.name}" class="doctor-image">
-                    <div class="doctor-info" style="display: flex; flex-direction: column; flex: 1;">
-                        <span class="specialty">${d.specialty}</span>
-                        <h3 style="margin-bottom: 0.75rem;">${d.name}</h3>
-                        <div class="stats-row">
-                            <div class="rating-badge">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                                ${d.rating}
-                            </div>
-                            <span class="price-badge">${d.price}</span>
-                        </div>
-                        <a href="doctor-profile.html?id=${d.id}" class="btn btn-primary" style="margin-top: auto;">Book Appointment</a>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function showSkeletons() {
-            const grid = document.getElementById('doctorsGrid');
-            grid.innerHTML = Array(4).fill(0).map(() => `
-                <div class="card" style="pointer-events: none;">
-                    <div class="skeleton" style="width: 100%; aspect-ratio: 1; margin-bottom: 1rem;"></div>
-                    <div class="skeleton" style="width: 50%; height: 1rem; margin-bottom: 0.75rem;"></div>
-                    <div class="skeleton" style="width: 80%; height: 1.5rem; margin-bottom: 1.25rem;"></div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
-                         <div class="skeleton" style="width: 30%; height: 1rem;"></div>
-                         <div class="skeleton" style="width: 30%; height: 1rem;"></div>
-                    </div>
-                    <div class="skeleton" style="width: 100%; height: 3rem; border-radius: 0.5rem;"></div>
-                </div>
-            `).join('');
-        }
-
-        // Search logic
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            searchQuery = e.target.value;
-            renderDoctors();
+    function renderSpecFilters() {
+      var container = document.getElementById('filterContainer');
+      container.innerHTML = specialties
+        .map(function (s) {
+          return (
+            '<button type="button" class="filter-chip ' +
+            (currentSpec === s ? 'active' : '') +
+            '" data-spec="' +
+            s +
+            '">' +
+            s +
+            '</button>'
+          );
+        })
+        .join('');
+      container.querySelectorAll('.filter-chip').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          currentSpec = btn.getAttribute('data-spec');
+          renderSpecFilters();
+          renderDoctors();
         });
+      });
+    }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            renderFilters();
-            showSkeletons();
-            setTimeout(() => {
-                renderDoctors();
-            }, 800); // Simulate loading delay
-        });
-    </script>
+    function renderDoctors() {
+      var grid = document.getElementById('doctorsGrid');
+      var clinicVal = document.getElementById('clinicFilter').value;
+      currentClinic = clinicVal;
+
+      var filtered = allDoctors().filter(function (d) {
+        var specOk = currentSpec === 'الكل' || d.specialty === currentSpec;
+        var clinicOk = clinicVal === 'الكل' || String(d.clinicId) === String(clinicVal);
+        var q = searchQuery.trim();
+        var searchOk =
+          !q ||
+          d.name.includes(q) ||
+          d.specialty.includes(q) ||
+          (getClinicById(d.clinicId) && getClinicById(d.clinicId).name.includes(q));
+        return specOk && clinicOk && searchOk;
+      });
+
+      if (!filtered.length) {
+        grid.innerHTML =
+          '<div class="card text-center" style="grid-column: 1/-1; padding: 3rem; color: var(--text-secondary)">لا توجد نتائج مطابقة لبحثك.</div>';
+        return;
+      }
+
+      grid.innerHTML = filtered
+        .map(function (d) {
+          var clinic = getClinicById(d.clinicId);
+          return (
+            '<article class="card doctor-card fade-in">' +
+            '<img src="' +
+            d.image +
+            '" alt="' +
+            d.name +
+            '" class="doctor-image" loading="lazy" />' +
+            '<div class="doctor-info" style="display:flex;flex-direction:column;flex:1">' +
+            '<span class="specialty">' +
+            d.specialty +
+            '</span>' +
+            '<h3>' +
+            d.name +
+            '</h3>' +
+            '<p class="clinic-line">' +
+            (clinic ? clinic.name : '') +
+            '</p>' +
+            '<div class="stats-row">' +
+            '<div class="rating-badge">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>' +
+            d.rating +
+            '</div>' +
+            '<span style="font-weight:900">' +
+            formatDoctorPrice(d) +
+            '</span>' +
+            '</div>' +
+            '<a href="doctor-profile.html?id=' +
+            d.id +
+            '" class="btn btn-primary" style="margin-top:auto">احجز الآن</a>' +
+            '</div></article>'
+          );
+        })
+        .join('');
+    }
+
+    function showSkeletons() {
+      var grid = document.getElementById('doctorsGrid');
+      grid.innerHTML = Array(4)
+        .fill(0)
+        .map(function () {
+          return (
+            '<div class="card" style="pointer-events:none">' +
+            '<div class="skeleton" style="width:100%;aspect-ratio:1;margin-block-end:1rem"></div>' +
+            '<div class="skeleton" style="width:45%;height:1rem;margin-block-end:0.65rem"></div>' +
+            '<div class="skeleton" style="width:78%;height:1.35rem;margin-block-end:1rem"></div>' +
+            '<div class="skeleton" style="width:100%;height:2.85rem;border-radius:0.65rem"></div>' +
+            '</div>'
+          );
+        })
+        .join('');
+    }
+
+    document.getElementById('searchInput').addEventListener('input', function (e) {
+      searchQuery = e.target.value;
+      renderDoctors();
+    });
+    document.getElementById('clinicFilter').addEventListener('change', renderDoctors);
+
+    document.addEventListener('DOMContentLoaded', function () {
+      clinicOptions();
+      renderSpecFilters();
+      showSkeletons();
+      setTimeout(renderDoctors, 700);
+    });
+  </script>
 </body>
 </html>
-

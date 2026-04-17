@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة المدير | Medi Queue</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .admin-form {
+      display: grid;
+      gap: 0.65rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      align-items: end;
+      margin-block-end: 0.75rem;
+    }
+    .stack {
+      display: grid;
+      gap: 0.45rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="particles-container"></div>
+  <main class="main-content dash-page-main">
+    <div class="container" style="max-width: 1200px">
+      <section id="users" style="scroll-margin-top: 5rem">
+        <h2 class="section-title">إدارة المستخدمين</h2>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>الاسم</th>
+                <th>البريد</th>
+                <th>الجوال</th>
+                <th>الدور</th>
+                <th>إجراء</th>
+              </tr>
+            </thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="doctors" style="margin-top: 2rem; scroll-margin-top: 5rem">
+        <h2 class="section-title">إدارة الأطباء</h2>
+        <div class="card" style="margin-block-end: 0.75rem">
+          <h3 style="font-weight: 900; margin-block-end: 0.65rem">إضافة طبيب</h3>
+          <div class="admin-form">
+            <div class="stack">
+              <label class="form-label" for="dName">الاسم</label>
+              <input class="form-input" id="dName" placeholder="د. …" />
+            </div>
+            <div class="stack">
+              <label class="form-label" for="dSpec">التخصص</label>
+              <input class="form-input" id="dSpec" placeholder="مثال: الباطنة" />
+            </div>
+            <div class="stack">
+              <label class="form-label" for="dClinic">العيادة</label>
+              <select class="form-select" id="dClinic"></select>
+            </div>
+            <div class="stack">
+              <label class="form-label" for="dPrice">سعر الكشف</label>
+              <input class="form-input" id="dPrice" type="number" min="50" step="10" value="200" />
+            </div>
+            <div class="stack">
+              <label class="form-label" for="dImg">رابط الصورة</label>
+              <input class="form-input" id="dImg" placeholder="https://…" />
+            </div>
+            <button type="button" class="btn btn-primary" id="addDoctorBtn" style="height: 3.05rem">إضافة</button>
+          </div>
+          <p class="text-secondary" style="font-size: 0.85rem; font-weight: 700">سيتم إنشاء مواعيد افتراضية تلقائياً.</p>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>الطبيب</th>
+                <th>التخصص</th>
+                <th>العيادة</th>
+                <th>السعر</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="doctorsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="clinics" style="margin-top: 2rem; scroll-margin-top: 5rem">
+        <h2 class="section-title">إدارة العيادات</h2>
+        <div class="card" style="margin-block-end: 0.75rem">
+          <div class="admin-form">
+            <div class="stack" style="grid-column: 1 / -1">
+              <label class="form-label" for="cName">اسم العيادة</label>
+              <input class="form-input" id="cName" placeholder="مثال: عيادة النور" />
+            </div>
+            <div class="stack">
+              <label class="form-label" for="cAddr">العنوان</label>
+              <input class="form-input" id="cAddr" placeholder="المدينة — الحي" />
+            </div>
+            <div class="stack">
+              <label class="form-label" for="cPhone">الهاتف</label>
+              <input class="form-input" id="cPhone" placeholder="01…" />
+            </div>
+            <button type="button" class="btn btn-secondary" id="addClinicBtn" style="height: 3.05rem">إضافة عيادة</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>الاسم</th>
+                <th>العنوان</th>
+                <th>الهاتف</th>
+                <th>حذف</th>
+              </tr>
+            </thead>
+            <tbody id="clinicsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="bookings" style="margin-top: 2rem; scroll-margin-top: 5rem">
+        <h2 class="section-title">كل الحجوزات</h2>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>المريض</th>
+                <th>الطبيب</th>
+                <th>العيادة</th>
+                <th>الموعد</th>
+                <th>الحالة</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    function roleLabel(r) {
+      var m = { patient: 'مريض', doctor: 'طبيب', admin: 'مدير النظام' };
+      return m[r] || r;
+    }
+
+    function fillClinicSelect() {
+      var sel = document.getElementById('dClinic');
+      sel.innerHTML = AppStore.clinics
+        .map(function (c) {
+          return '<option value="' + c.id + '">' + c.name + '</option>';
+        })
+        .join('');
+    }
+
+    function renderUsers() {
+      document.getElementById('usersBody').innerHTML = AppStore.users
+        .map(function (u) {
+          return (
+            '<tr>' +
+            '<td style="font-weight:900">' +
+            u.name +
+            '</td>' +
+            '<td>' +
+            u.email +
+            '</td>' +
+            '<td>' +
+            (u.phone || '') +
+            '</td>' +
+            '<td><span class="status-badge status-progress">' +
+            roleLabel(u.role) +
+            '</span></td>' +
+            '<td><button type="button" class="btn btn-danger-outline btn-sm" data-del-user="' +
+            u.email +
+            '">حذف</button></td></tr>'
+          );
+        })
+        .join('');
+
+      document.querySelectorAll('[data-del-user]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var email = btn.getAttribute('data-del-user');
+          MediModal.confirm('حذف مستخدم', 'لن يمكن التراجع عن الحذف في وضع التجربة.', function () {
+            AppStore.users = AppStore.users.filter(function (u) {
+              return u.email !== email;
+            });
+            renderUsers();
+            showNotification('تم حذف المستخدم.', 'success');
+          });
+        });
+      });
+    }
+
+    function renderDoctors() {
+      document.getElementById('doctorsBody').innerHTML = AppStore.getDoctors()
+        .map(function (d) {
+          var c = AppStore.clinics.find(function (x) {
+            return x.id === d.clinicId;
+          });
+          return (
+            '<tr data-doc-id="' +
+            d.id +
+            '">' +
+            '<td style="font-weight:900">' +
+            d.name +
+            '</td>' +
+            '<td>' +
+            d.specialty +
+            '</td>' +
+            '<td>' +
+            (c ? c.name : '') +
+            '</td>' +
+            '<td style="font-weight:900">' +
+            formatDoctorPrice(d) +
+            '</td>' +
+            '<td><div class="table-actions">' +
+            '<button type="button" class="btn btn-outline btn-sm" data-edit-doc="' +
+            d.id +
+            '">تعديل</button> ' +
+            '<button type="button" class="btn btn-danger-outline btn-sm" data-del-doc="' +
+            d.id +
+            '">حذف</button>' +
+            '</div></td></tr>'
+          );
+        })
+        .join('');
+
+      document.querySelectorAll('[data-del-doc]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = parseInt(btn.getAttribute('data-del-doc'), 10);
+          MediModal.confirm('حذف طبيب', 'سيتم حذف الطبيب من القائمة.', function () {
+            AppStore.setDoctors(
+              AppStore.getDoctors().filter(function (d) {
+                return d.id !== id;
+              })
+            );
+            renderDoctors();
+            fillClinicSelect();
+            showNotification('تم حذف الطبيب.', 'success');
+          });
+        });
+      });
+
+      document.querySelectorAll('[data-edit-doc]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = parseInt(btn.getAttribute('data-edit-doc'), 10);
+          var d = AppStore.getDoctors().find(function (x) {
+            return x.id === id;
+          });
+          if (!d) return;
+          var name = prompt('اسم الطبيب:', d.name);
+          if (!name) return;
+          var spec = prompt('التخصص:', d.specialty);
+          if (!spec) return;
+          var price = parseInt(prompt('سعر الكشف (رقم):', String(d.price)), 10);
+          if (!price) return;
+          AppStore.setDoctors(
+            AppStore.getDoctors().map(function (x) {
+              if (x.id !== id) return x;
+              return Object.assign({}, x, { name: name.trim(), specialty: spec.trim(), price: price });
+            })
+          );
+          renderDoctors();
+          showNotification('تم تحديث بيانات الطبيب.', 'success');
+        });
+      });
+    }
+
+    function renderClinics() {
+      document.getElementById('clinicsBody').innerHTML = AppStore.clinics
+        .map(function (c) {
+          return (
+            '<tr>' +
+            '<td style="font-weight:900">' +
+            c.name +
+            '</td>' +
+            '<td>' +
+            c.address +
+            '</td>' +
+            '<td>' +
+            c.phone +
+            '</td>' +
+            '<td><button type="button" class="btn btn-danger-outline btn-sm" data-del-clinic="' +
+            c.id +
+            '">حذف</button></td></tr>'
+          );
+        })
+        .join('');
+
+      document.querySelectorAll('[data-del-clinic]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = parseInt(btn.getAttribute('data-del-clinic'), 10);
+          MediModal.confirm('حذف عيادة', 'تأكد من عدم ربط أطباء بعيادة غير موجودة بعد الحذف.', function () {
+            AppStore.clinics = AppStore.clinics.filter(function (c) {
+              return c.id !== id;
+            });
+            renderClinics();
+            fillClinicSelect();
+            showNotification('تم حذف العيادة.', 'success');
+          });
+        });
+      });
+    }
+
+    function renderBookings() {
+      document.getElementById('bookingsBody').innerHTML = AppStore.appointments
+        .slice()
+        .reverse()
+        .map(function (a) {
+          return (
+            '<tr>' +
+            '<td style="font-weight:900">' +
+            a.patientName +
+            '<div class="text-secondary" style="font-size:0.82rem;font-weight:700">' +
+            a.patientPhone +
+            '</div></td>' +
+            '<td>' +
+            a.doctorName +
+            '</td>' +
+            '<td>' +
+            (a.clinicName || '') +
+            '</td>' +
+            '<td style="font-weight:800">' +
+            a.slot +
+            '</td>' +
+            '<td><span class="status-badge status-progress">' +
+            appointmentStatusLabel(a.status || 'confirmed') +
+            '</span></td></tr>'
+          );
+        })
+        .join('');
+    }
+
+    document.getElementById('addDoctorBtn').addEventListener('click', function () {
+      var name = document.getElementById('dName').value.trim();
+      var spec = document.getElementById('dSpec').value.trim();
+      var clinicId = parseInt(document.getElementById('dClinic').value, 10);
+      var price = parseInt(document.getElementById('dPrice').value, 10);
+      var img = document.getElementById('dImg').value.trim();
+      if (!name || !spec) return MediModal.alert('تنبيه', 'أدخل الاسم والتخصص.');
+      var list = AppStore.getDoctors();
+      var nextId = list.reduce(function (m, d) {
+        return Math.max(m, d.id);
+      }, 0) + 1;
+      var neu = {
+        id: nextId,
+        name: name,
+        specialty: spec,
+        clinicId: clinicId,
+        rating: 4.7,
+        price: price || 200,
+        currency: 'ر.س',
+        image: img || 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=400&fit=crop',
+        about: 'طبيب/ة مسجل/ة في النظام (بيانات تجريبية).',
+        slots: ['09:00', '10:00', '11:30', '13:00'],
+        userEmail: '',
+      };
+      list.push(neu);
+      AppStore.setDoctors(list);
+      document.getElementById('dName').value = '';
+      document.getElementById('dSpec').value = '';
+      document.getElementById('dImg').value = '';
+      renderDoctors();
+      showNotification('تمت إضافة الطبيب.', 'success');
+    });
+
+    document.getElementById('addClinicBtn').addEventListener('click', function () {
+      var name = document.getElementById('cName').value.trim();
+      var addr = document.getElementById('cAddr').value.trim();
+      var phone = document.getElementById('cPhone').value.trim();
+      if (!name) return MediModal.alert('تنبيه', 'أدخل اسم العيادة.');
+      var cs = AppStore.clinics.slice();
+      var nextId = cs.reduce(function (m, c) {
+        return Math.max(m, c.id);
+      }, 0) + 1;
+      cs.push({ id: nextId, name: name, address: addr || '—', phone: phone || '—' });
+      AppStore.clinics = cs;
+      document.getElementById('cName').value = '';
+      document.getElementById('cAddr').value = '';
+      document.getElementById('cPhone').value = '';
+      renderClinics();
+      fillClinicSelect();
+      showNotification('تمت إضافة العيادة.', 'success');
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var t = document.getElementById('dashPageTitle');
+      if (t) t.textContent = 'لوحة المدير';
+      fillClinicSelect();
+      renderUsers();
+      renderDoctors();
+      renderClinics();
+      renderBookings();
+    });
+  </script>
+</body>
+</html>
